@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Your Uploaded Files</title>
+  </head>
+  <body>
+    <% layout('layout') %>
+
+    <h2 class="text-center">Your Uploaded Files</h2>
+    <table class="table table-bordered mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>Filename</th>
+          <th>Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% files.forEach(file => { %>
+        <tr>
+          <td><%= file.filename %></td>
+          <td>
+            <a
+              href="/files/download/<%= file.filename %>"
+              class="btn btn-success btn-sm"
+              >Download</a
+            >
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </body>
+</html>

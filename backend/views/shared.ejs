@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Shared File</title>
+  </head>
+  <body>
+    <h1>Shared File: <%= file.filename %></h1>
+
+    <% if (file.permission === "view") { %>
+    <p>View Mode Enabled</p>
+    <pre>File Path: <%= file.path %></pre>
+    <% } else { %>
+    <a href="/files/download/<%= file.filename %>">
+      <button>Download File</button>
+    </a>
+    <% } %>
+  </body>
+</html>
