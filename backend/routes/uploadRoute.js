@@ -5,6 +5,7 @@ const File = require("../models/files");
 const fs = require("fs");
 const crypto = require("crypto");
 const { title } = require("process");
+const { v4: uuid4 } = require("uuid");
 
 const router = express.Router();
 
@@ -77,20 +78,17 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
   try {
     if (!req.file) {
-      console.log("No file recived");
       return res.status(400).json({ message: "No file Recived" });
     }
-    console.log("File Details:", req.file);
-
     const newFile = new File({
       filename: req.file.filename,
       path: req.file.path,
       uploadedBy: req.user._id,
+      shareableLink: uuid4(),
     });
     await newFile.save();
     res.redirect("/files/myfiles");
   } catch (error) {
-    console.error("UPLOAD ERROR:", error);
     res.status(500).json({ error: "Failed to Upload File!!" });
   }
 });
@@ -147,7 +145,7 @@ router.get("/shared/:link", async (req, res) => {
     if (file.expiresAt && file.expiresAt < new Date()) {
       return res.status(410).json({ message: "This link has expired!!" });
     }
-    const filePath = path.join(__dirname, "..", file.path);
+    const filePath = file.path;
     const fileType = path.extname(file.filename).toLowerCase();
 
     if (file.permission === "view") {

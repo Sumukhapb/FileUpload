@@ -2,17 +2,60 @@
 <html lang="en">
   <head>
     <title>Shared File</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+
+      pre {
+        background-color: #f8f8f8;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 14px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
   </head>
   <body>
     <h1>Shared File: <%= file.filename %></h1>
 
     <% if (file.permission === "view") { %>
-    <p>View Mode Enabled</p>
-    <pre>File Path: <%= file.path %></pre>
+      <p>View Mode Enabled</p>
+
+      <% if (fileContent) { 
+          const fileExtension = file.filename.split('.').pop(); 
+      %>
+        <pre><code class="language-<%= fileExtension %>"><%= fileContent %></code></pre>
+      <% } else { %>
+        <p>Preview not available for this file type.</p>
+      <% } %>
     <% } else { %>
-    <a href="/files/download/<%= file.filename %>">
-      <button>Download File</button>
-    </a>
+      <p>Download Only</p>
+      <a href="/files/shared/<%= file.shareableLink %>">
+        <button>Download File</button>
+      </a>
     <% } %>
   </body>
 </html>
