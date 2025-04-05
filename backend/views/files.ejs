@@ -2,16 +2,22 @@
 <html lang="en">
   <head>
     <title>Your Uploaded Files</title>
+    <!-- Bootstrap CSS (Make sure this is included) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <% layout('layout') %>
-
+    <a href="/files/access-shared" class="btn btn-outline-primary">Access Shared File</a>
     <h2 class="text-center">Your Uploaded Files</h2>
     <table class="table table-bordered mt-3">
       <thead class="table-dark">
         <tr>
           <th>Filename</th>
           <th>Download</th>
+          <th>Share</th>
         </tr>
       </thead>
       <tbody>
@@ -22,12 +28,72 @@
             <a
               href="/files/download/<%= file.filename %>"
               class="btn btn-success btn-sm"
-              >Download</a
-            >
+              >Download</a>
+          </td>
+          <td>
+            <button 
+              class="btn btn-primary btn-sm share-btn" 
+              data-file-id="<%= file._id %>">
+              Share
+            </button>
           </td>
         </tr>
         <% }) %>
       </tbody>
     </table>
+
+    <!-- Share Modal -->
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Share File</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="text-muted">Copy and share this link. It will expire in 24 hours.</p>
+            <input type="text" class="form-control" id="shareLink" readonly>
+            <button class="btn btn-outline-secondary mt-2" onclick="copyLink()">Copy Link</button>
+            <p class="text-success mt-2" id="copyStatus" style="display: none;">Link copied!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const shareButtons = document.querySelectorAll('.share-btn');
+
+      shareButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+          const fileId = button.getAttribute('data-file-id');
+
+          try {
+            const res = await fetch(`/files/share/${fileId}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (res.ok) {
+              document.getElementById('shareLink').value = data.link;
+              document.getElementById('copyStatus').style.display = 'none';
+              const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+              modal.show();
+            } else {
+              alert(data.message || 'Failed to generate link');
+            }
+          } catch (err) {
+            alert('Something went wrong!');
+          }
+        });
+      });
+
+      function copyLink() {
+        const input = document.getElementById('shareLink');
+        input.select();
+        document.execCommand('copy');
+        document.getElementById('copyStatus').style.display = 'block';
+      }
+    </script>
   </body>
 </html>

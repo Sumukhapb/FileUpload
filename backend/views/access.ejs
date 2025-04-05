@@ -1,0 +1,27 @@
+<!-- views/access.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Access Shared File</title>
+  </head>
+  <body>
+    <% layout('layout') %>
+    <div class="container mt-4">
+      <h2 class="text-center">Access Shared File</h2>
+      <form action="/files/open-shared" method="GET" class="mt-4">
+        <div class="mb-3">
+          <label for="link" class="form-label">Paste Share Link or ID</label>
+          <input
+            type="text"
+            name="link"
+            id="link"
+            class="form-control"
+            placeholder="e.g. http://localhost:8000/files/shared/abc123 OR just abc123"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Open File</button>
+      </form>
+    </div>
+  </body>
+</html>

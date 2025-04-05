@@ -145,6 +145,8 @@ router.get("/shared/:link", async (req, res) => {
     if (file.expiresAt && file.expiresAt < new Date()) {
       return res.status(410).json({ message: "This link has expired!!" });
     }
+
+    // const filePath = path.join(__dirname, "..", file.path);
     const filePath = file.path;
     const fileType = path.extname(file.filename).toLowerCase();
 
@@ -152,24 +154,59 @@ router.get("/shared/:link", async (req, res) => {
       if ([".jpg", ".png"].includes(fileType)) {
         return res.sendFile(filePath);
       } else if ([".txt", ".js", ".css", ".html"].includes(fileType)) {
-        const fileContent = fs.readFileSync(filePath, "utf8");
-        return res.render("shared", {
-          title: "Shared File",
-          fileContent,
-          file,
-        });
+        try {
+          const fileContent = fs.readFileSync(filePath, "utf8");
+          return res.render("shared", {
+            title: "Shared File",
+            fileContent,
+            file,
+          });
+        } catch (err) {
+          return res.render("shared", {
+            title: "Shared File",
+            message: "File not found in storage!",
+          });
+        }
       } else {
         return res.render("shared", {
           title: "Shared File",
           message: "Preview not Available",
+          file,
         });
       }
     } else {
       return res.download(filePath);
     }
   } catch (error) {
+    console.error("Error in /shared/:link route:", error);
     res.status(500).json({ error: "Internal Server Error!!" });
   }
+});
+
+router.get("/open-shared", (req, res) => {
+  const input = req.query.link;
+  if (!input) return res.redirect("/dashboard");
+
+  let shareId;
+
+  try {
+    if (input.startsWith("http")) {
+      const url = new URL(input);
+      const parts = url.pathname.split("/");
+      shareId = parts[parts.length - 1];
+    } else {
+      shareId = input.trim();
+    }
+
+    res.redirect(`/files/shared/${shareId}`);
+  } catch (err) {
+    res.status(400).send("Invalid link format.");
+  }
+});
+
+router.get("/access-shared", (req, res) => {
+  if (!req.isAuthenticated()) return res.redirect("/login");
+  res.render("access", { title: "Access Shared File", user: req.user });
 });
 
 module.exports = router;

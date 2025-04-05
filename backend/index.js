@@ -7,6 +7,7 @@ const engine = require("ejs-mate")
 require("dotenv").config();
 require("./middleware/passportConfig");
 const uploadRoutes = require("./routes/uploadRoute");
+const PORT = process.env.PORT;
 
 const app = express();
 
@@ -33,4 +34,4 @@ app.get("/", (req, res) => {
 });
 
 
-app.listen(8000, () => console.log("Server running on port 8000"));
+app.listen(PORT, () => console.log("Server running on port 8000"));
