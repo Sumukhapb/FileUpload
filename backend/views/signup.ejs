@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("partials/head") %>
+  <title>Signup</title>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card mx-auto shadow" style="max-width: 400px;">
+      <div class="card-body">
+        <h3 class="card-title text-center mb-4">Create Account</h3>
+
+        <form action="/auth/signup" method="POST">
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="name" id="name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" name="email" id="email" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password (min 6 chars)</label>
+            <input type="password" class="form-control" name="password" id="password" required minlength="6">
+          </div>
+
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+          </div>
+        </form>
+
+        <p class="text-center mb-2">Already have an account? <a href="/auth/login">Login</a></p>
+
+        <div class="text-center">
+          <hr>
+          <p>or continue with</p>
+          <a href="/auth/google" class="btn btn-outline-danger w-100">
+            <i class="fab fa-google me-2"></i> Google
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include("partials/scripts") %>
+</body>
+</html>
