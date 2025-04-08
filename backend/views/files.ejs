@@ -10,7 +10,9 @@
   </head>
   <body>
     <% layout('layout') %>
-    <a href="/files/access-shared" class="btn btn-outline-primary">Access Shared File</a>
+    <a href="/files/access-shared" class="btn btn-outline-primary"
+      >Access Shared File</a
+    >
     <h2 class="text-center">Your Uploaded Files</h2>
     <table class="table table-bordered mt-3">
       <thead class="table-dark">
@@ -18,6 +20,11 @@
           <th>Filename</th>
           <th>Download</th>
           <th>Share</th>
+          <th>Rename</th>
+          <th>Delete</th>
+          <% if (showLink) { %>
+          <th>DownLoad Link</th>
+          <% } %>
         </tr>
       </thead>
       <tbody>
@@ -28,34 +35,124 @@
             <a
               href="/files/download/<%= file.filename %>"
               class="btn btn-success btn-sm"
-              >Download</a>
+              >Download</a
+            >
           </td>
           <td>
-            <button 
-              class="btn btn-primary btn-sm share-btn" 
-              data-file-id="<%= file._id %>">
+            <button
+              class="btn btn-primary btn-sm share-btn"
+              data-file-id="<%= file._id %>"
+            >
               Share
             </button>
           </td>
+          <td>
+            <button
+              class="btn btn-warning btn-sm rename-btn"
+              data-file-id="<%= file._id %>"
+              data-filename="<%= file.filename %>"
+            >
+              Rename
+            </button>
+          </td>
+          <td>
+            <form
+              action="/files/delete/<%= file._id %>?_method=DELETE"
+              method="POST"
+              onsubmit="return confirm('Are you sure you want to delete this file?');"
+            >
+              <button type="submit" class="btn btn-danger btn-sm">
+                Delete
+              </button>
+            </form>
+          </td>
+          <% if (showLink) { %>
+          <td>
+            <input
+              class="form-control"
+              value="http://localhost:8000/files/download/<%= file.filename %>"
+              readonly
+            />
+          </td>
+          <% } %>
         </tr>
         <% }) %>
       </tbody>
     </table>
 
     <!-- Share Modal -->
-    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="shareModal"
+      tabindex="-1"
+      aria-labelledby="shareModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Share File</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
           <div class="modal-body text-center">
-            <p class="text-muted">Copy and share this link. It will expire in 24 hours.</p>
-            <input type="text" class="form-control" id="shareLink" readonly>
-            <button class="btn btn-outline-secondary mt-2" onclick="copyLink()">Copy Link</button>
-            <p class="text-success mt-2" id="copyStatus" style="display: none;">Link copied!</p>
+            <p class="text-muted">
+              Copy and share this link. It will expire in 24 hours.
+            </p>
+            <input type="text" class="form-control" id="shareLink" readonly />
+            <button class="btn btn-outline-secondary mt-2" onclick="copyLink()">
+              Copy Link
+            </button>
+            <p class="text-success mt-2" id="copyStatus" style="display: none">
+              Link copied!
+            </p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div
+      class="modal fade"
+      id="renameModal"
+      tabindex="-1"
+      aria-labelledby="renameModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form id="renameForm">
+            <div class="modal-header">
+              <h5 class="modal-title">Rename File</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="renameFileId" />
+              <div class="mb-3">
+                <label for="newFileName" class="form-label"
+                  >New File Name</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="newFileName"
+                  required
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Rename</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -64,35 +161,79 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      const shareButtons = document.querySelectorAll('.share-btn');
+      const shareButtons = document.querySelectorAll(".share-btn");
 
-      shareButtons.forEach(button => {
-        button.addEventListener('click', async () => {
-          const fileId = button.getAttribute('data-file-id');
+      shareButtons.forEach((button) => {
+        button.addEventListener("click", async () => {
+          const fileId = button.getAttribute("data-file-id");
 
           try {
-            const res = await fetch(`/files/share/${fileId}`, { method: 'POST' });
+            const res = await fetch(`/files/share/${fileId}`, {
+              method: "POST",
+            });
             const data = await res.json();
 
             if (res.ok) {
-              document.getElementById('shareLink').value = data.link;
-              document.getElementById('copyStatus').style.display = 'none';
-              const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+              document.getElementById("shareLink").value = data.link;
+              document.getElementById("copyStatus").style.display = "none";
+              const modal = new bootstrap.Modal(
+                document.getElementById("shareModal")
+              );
               modal.show();
             } else {
-              alert(data.message || 'Failed to generate link');
+              alert(data.message || "Failed to generate link");
             }
           } catch (err) {
-            alert('Something went wrong!');
+            alert("Something went wrong!");
           }
         });
       });
 
+      const renameButtons = document.querySelectorAll(".rename-btn");
+
+      renameButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const fileId = button.getAttribute("data-file-id");
+          const currentName = button.getAttribute("data-filename");
+          document.getElementById("renameFileId").value = fileId;
+          document.getElementById("newFileName").value = currentName;
+          const modal = new bootstrap.Modal(
+            document.getElementById("renameModal")
+          );
+          modal.show();
+        });
+      });
+
+      document
+        .getElementById("renameForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const fileId = document.getElementById("renameFileId").value;
+          const newFileName = document.getElementById("newFileName").value;
+
+          try {
+            const res = await fetch(`/files/rename/${fileId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ newFileName }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+              window.location.reload();
+            } else {
+              alert(data.error || "Rename failed!");
+            }
+          } catch (err) {
+            alert("Error renaming file!");
+          }
+        });
+
       function copyLink() {
-        const input = document.getElementById('shareLink');
+        const input = document.getElementById("shareLink");
         input.select();
-        document.execCommand('copy');
-        document.getElementById('copyStatus').style.display = 'block';
+        document.execCommand("copy");
+        document.getElementById("copyStatus").style.display = "block";
       }
     </script>
   </body>

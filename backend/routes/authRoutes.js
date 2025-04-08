@@ -87,7 +87,7 @@ router.get("/dashboard", async (req, res) => {
     return res.redirect("/auth/login");
   }
 
-  res.render("dashboard", { title: "Dashboard", user: req.user });
+  res.render("dashboard", { title: "Dashboard", user: req.user, showLink: true });
 });
 
 module.exports = router;

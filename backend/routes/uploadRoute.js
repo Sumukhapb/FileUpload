@@ -82,7 +82,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     }
     const newFile = new File({
       filename: req.file.filename,
-      path: req.file.path,
+      path: `uploads/${req.file.filename}`,
       uploadedBy: req.user._id,
       shareableLink: uuid4(),
     });
@@ -99,7 +99,12 @@ router.get("/myfiles", async (req, res) => {
   }
 
   const files = await File.find({ uploadedBy: req.user._id });
-  res.render("files", { title: "My Files", user: req.user, files });
+  res.render("files", {
+    title: "My Files",
+    user: req.user,
+    files,
+    showLink: false,
+  });
 });
 
 router.get("/download/:filename", (req, res) => {
@@ -146,8 +151,8 @@ router.get("/shared/:link", async (req, res) => {
       return res.status(410).json({ message: "This link has expired!!" });
     }
 
-    // const filePath = path.join(__dirname, "..", file.path);
-    const filePath = file.path;
+    const filePath = path.join(__dirname, "..", file.path);
+    // const filePath = file.path;
     const fileType = path.extname(file.filename).toLowerCase();
 
     if (file.permission === "view") {
