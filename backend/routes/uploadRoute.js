@@ -30,7 +30,8 @@ router.delete("/delete/:id", async (req, res) => {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath); //just deleting from storage
 
     await file.deleteOne();
-    res.json({ message: "File deleted successfully" }); //delete from db
+    // res.json({ message: "File deleted successfully" }); //delete from db
+    res.redirect("/files/myfiles");
   } catch (error) {
     res.status(500).json({ error: "Internal Server error" });
   }
