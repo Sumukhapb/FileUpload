@@ -19,9 +19,13 @@
         <p class="text-muted">Email: <%= user.email %></p>
       </div>
 
-      <div class="mt-4">
+      <!-- <div class="mt-4">
         <h4>Open Shared File</h4>
-        <form action="/files/open-shared" method="GET" class="d-flex justify-content-center">
+        <form
+          action="/files/open-shared"
+          method="GET"
+          class="d-flex justify-content-center"
+        >
           <input
             type="text"
             name="link"
@@ -30,6 +34,23 @@
             required
           />
           <button type="submit" class="btn btn-primary">Open</button>
+        </form>
+      </div> -->
+      <div class="container mt-4">
+        <h2 class="text-center">Access Shared File</h2>
+        <form action="/files/open-shared" method="GET" class="mt-4">
+          <div class="mb-3">
+            <label for="link" class="form-label">Paste Share Link or ID</label>
+            <input
+              type="text"
+              name="link"
+              id="link"
+              class="form-control"
+              placeholder="e.g. http://localhost:8000/files/shared/abc123 OR just abc123"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Open File</button>
         </form>
       </div>
     </div>

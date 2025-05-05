@@ -6,8 +6,10 @@ const fs = require("fs");
 const crypto = require("crypto");
 const { title } = require("process");
 const { v4: uuid4 } = require("uuid");
+const ensureAuthentication = require("../middleware/authMiddleware");
 
 const router = express.Router();
+router.use(ensureAuthentication);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -18,7 +20,39 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    ".txt",
+    ".js",
+    ".html",
+    ".css",
+    ".py",
+    ".java",
+    ".cpp",
+    ".md",
+    ".pdf",
+    ".docx",
+    ".xlsx",
+    ".json",
+    ".csv",
+    ".png",
+    ".jpg",
+    ".jpeg",
+  ];
+
+  const extname = path.extname(file.originalname).toLowerCase();
+
+  if (allowedTypes.includes(extname)) {
+    cb(null, true);
+  } else {
+    cb(new Error("File type not allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+});
 
 router.delete("/delete/:id", async (req, res) => {
   try {
@@ -67,20 +101,19 @@ router.put("/rename/:id", async (req, res) => {
 
 router.get("/upload", (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect("/login");
+    return res.redirect("/auth/login");
   }
   res.render("upload", { title: "Upload File", user: req.user });
 });
 
 router.post("/upload", upload.single("file"), async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: "Unauthorized Access!" });
+  if (!req.file) {
+    return res
+      .status(400)
+      .send(`<h3 style="color:red;text-align:center;">No file selected</h3>`);
   }
 
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file Recived" });
-    }
     const newFile = new File({
       filename: req.file.filename,
       path: `uploads/${req.file.filename}`,
@@ -90,13 +123,18 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     await newFile.save();
     res.redirect("/files/myfiles");
   } catch (error) {
-    res.status(500).json({ error: "Failed to Upload File!!" });
+    console.error("Upload error:", error);
+    res
+      .status(500)
+      .send(
+        `<h3 style="color:red;text-align:center;">Failed to Upload File!!</h3>`
+      );
   }
 });
 
 router.get("/myfiles", async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect("/login");
+    return res.redirect("/auth/login");
   }
 
   const files = await File.find({ uploadedBy: req.user._id });
@@ -157,9 +195,20 @@ router.get("/shared/:link", async (req, res) => {
     const fileType = path.extname(file.filename).toLowerCase();
 
     if (file.permission === "view") {
-      if ([".jpg", ".png"].includes(fileType)) {
+      if ([".jpg", ".png", "jpeg"].includes(fileType)) {
         return res.sendFile(filePath);
-      } else if ([".txt", ".js", ".css", ".html"].includes(fileType)) {
+      } else if (
+        [
+          ".txt",
+          ".js",
+          ".css",
+          ".html",
+          ".py",
+          ".java",
+          ".cpp",
+          ".csv",
+        ].includes(fileType)
+      ) {
         try {
           const fileContent = fs.readFileSync(filePath, "utf8");
           return res.render("shared", {
@@ -173,6 +222,8 @@ router.get("/shared/:link", async (req, res) => {
             message: "File not found in storage!",
           });
         }
+      } else if ([".pdf", ".docx", ".xlsx"].includes(fileType)) {
+        return res.sendFile(filePath); // or use res.download(filePath);
       } else {
         return res.render("shared", {
           title: "Shared File",
