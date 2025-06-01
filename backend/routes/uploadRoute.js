@@ -38,6 +38,9 @@ const fileFilter = (req, file, cb) => {
     ".png",
     ".jpg",
     ".jpeg",
+    ".zip",
+    ".rar",
+    ".7z",
   ];
 
   const extname = path.extname(file.originalname).toLowerCase();
@@ -45,7 +48,8 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(extname)) {
     cb(null, true);
   } else {
-    cb(new Error("File type not allowed!"), false);
+    req.fileValidationError = "This file type is not supported.";
+    cb(null, false);
   }
 };
 
@@ -103,14 +107,23 @@ router.get("/upload", (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect("/auth/login");
   }
-  res.render("upload", { title: "Upload File", user: req.user });
+  res.render("upload", { title: "Upload File", user: req.user, message: null });
 });
 
 router.post("/upload", upload.single("file"), async (req, res) => {
+  if (req.fileValidationError) {
+    return res.status(400).render("upload", {
+      title: "Upload File",
+      user: req.user,
+      message: req.fileValidationError,
+    });
+  }
   if (!req.file) {
-    return res
-      .status(400)
-      .send(`<h3 style="color:red;text-align:center;">No file selected</h3>`);
+    return res.status(400).render("upload", {
+      title: "Upload File",
+      user: req.user,
+      message: "No file selected. Please choose a file to upload.",
+    });
   }
 
   try {
@@ -124,11 +137,11 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     res.redirect("/files/myfiles");
   } catch (error) {
     console.error("Upload error:", error);
-    res
-      .status(500)
-      .send(
-        `<h3 style="color:red;text-align:center;">Failed to Upload File!!</h3>`
-      );
+    return res.status(500).render("upload", {
+      title: "Upload File",
+      user: req.user,
+      message: "Failed to upload file. Please try again later.",
+    });
   }
 });
 
@@ -193,9 +206,10 @@ router.get("/shared/:link", async (req, res) => {
     const filePath = path.join(__dirname, "..", file.path);
     // const filePath = file.path;
     const fileType = path.extname(file.filename).toLowerCase();
+    const fileExtension = fileType.substring(1);
 
     if (file.permission === "view") {
-      if ([".jpg", ".png", "jpeg"].includes(fileType)) {
+      if ([".jpg", ".png", ".jpeg"].includes(fileType)) {
         return res.sendFile(filePath);
       } else if (
         [
@@ -213,22 +227,36 @@ router.get("/shared/:link", async (req, res) => {
           const fileContent = fs.readFileSync(filePath, "utf8");
           return res.render("shared", {
             title: "Shared File",
-            fileContent,
             file,
+            fileContent,
+            fileExtension
           });
         } catch (err) {
           return res.render("shared", {
             title: "Shared File",
+            file,
+            fileContent: null,
+            fileExtension,
             message: "File not found in storage!",
           });
         }
       } else if ([".pdf", ".docx", ".xlsx"].includes(fileType)) {
-        return res.sendFile(filePath); // or use res.download(filePath);
+        return res.sendFile(filePath);
+      } else if ([".zip", ".rar", ".7z"].includes(fileType)) {
+        return res.render("shared", {
+          title: "Shared File",
+          message: "Preview not Available for this file type",
+          file,
+          fileContent: null,
+          fileExtension,
+        });
       } else {
         return res.render("shared", {
           title: "Shared File",
-          message: "Preview not Available",
           file,
+          fileContent: null,
+          fileExtension,
+          message: "Preview not Available",
         });
       }
     } else {

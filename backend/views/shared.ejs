@@ -40,8 +40,8 @@
 
     <% if (file.permission === "view") { %>
     <p>View Mode Enabled</p>
-    <% const fileExtension = file.filename.split('.').pop(); %> <% if
-    (fileContent) { %>
+
+    <% if (fileContent) { %>
     <pre><code class="language-<%= fileExtension %>"><%= fileContent %></code></pre>
     <% } else if (message) { %>
     <p><%= message %></p>
