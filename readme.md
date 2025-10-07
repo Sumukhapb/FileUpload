@@ -2,20 +2,20 @@
 
 An Express.js application that allows authenticated users to upload, manage, and share files with temporary, expiring links. Supports in-browser previews for common file types and secure downloads for others.
 
-![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
-![Passport](https://img.shields.io/badge/Auth-Passport-34E27A?logo=passport&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue)
+ [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+ [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
+ [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+ [![Passport](https://img.shields.io/badge/Auth-Passport-34E27A?logo=passport&logoColor=white)](https://www.passportjs.org/)
+ [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE)
 
 ### 🧰 Tech Stack
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Views**: EJS with `ejs-mate` layouts
-- **Auth**: Passport (Local + Google OAuth 2.0)
-- **Database**: MongoDB with Mongoose
-- **Sessions**: `express-session` with `connect-mongo`
-- **Uploads**: Multer (disk storage)
+- **Runtime**: [Node.js](https://nodejs.org/)
+- **Framework**: [Express.js](https://expressjs.com/)
+- **Views**: [EJS](https://ejs.co/) with [ejs-mate](https://www.npmjs.com/package/ejs-mate) layouts
+- **Auth**: [Passport](https://www.passportjs.org/) (Local + [Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2))
+- **Database**: [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/)
+- **Sessions**: [express-session](https://github.com/expressjs/session) with [connect-mongo](https://www.npmjs.com/package/connect-mongo)
+- **Uploads**: [Multer](https://github.com/expressjs/multer) (disk storage)
 
 ### ✨ Features
 - 🔐 **Authentication**: Local email/password and Google sign-in
